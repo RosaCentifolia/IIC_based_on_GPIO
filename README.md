@@ -1,3 +1,13 @@
+
+项目名称：IIC_based_on_GPIO
+Project Name: IIC_based_on_GPIO
+项目简介：一种便于移植的、基于GPIO和软件方式实现的IIC通讯方法，提供队列发送和队列接收功能。
+Project Description: A portable, GPIO-based and software-implemented I2C communication method, providing queue-based sending and receiving functionalities.
+
+以下为使用方法说明
+The following are the usage instructions.
+
+
 1-10: 本说明书以中文说明为准，编码格式为UTF-8，基于冗余性考虑附注机器翻译英文说明。
 1-10: This manual is based on the Chinese instructions, the encoding format is UTF-8, and machine-translated English instructions are attached for redundancy.
 
