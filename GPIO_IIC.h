@@ -25,7 +25,8 @@
 extern uint8_t g_GPIOI2C_recvBuf[]; /*IIC Recv buff*/
 extern uint8_t g_GPIOI2C_recvBufLength;
 extern uint8_t g_GPIOI2C_sendBuf[];/*IIC Sending buff*/
-extern uint8_t g_GPIOI2C_send_bufLength;
+extern uint8_t g_GPIOI2C_sendBufLength;
+
 /*Debug test variable*/
 #ifdef  GPIO_IIC_DEBUG_MODE
 extern volatile uint16_t    countNACK_repeat,
@@ -34,16 +35,13 @@ extern volatile uint16_t    countNACK_repeat,
                             countACKsend,
                             countNACKsend;
 #endif
-/*Typedef declaration*/
-typedef enum{
-    Restart = 0u,
-    Start
-}START_STATUS;
+
 typedef enum{
     ACK_repeat = 0u,
     NACK_repeat,
     NACK_repeatType2
 }ACK_REPORT;
+
 /*Function declaration */
 void GPIO_I2C_RESET(void);
 ACK_REPORT GPIO_I2C_Puts(uint8_t SlaveAddr, uint8_t * sendQueue, uint8_t sendLength );
@@ -51,7 +49,7 @@ ACK_REPORT GPIO_I2C_Gets(uint8_t SlaveAddr, uint8_t * recvQueue, uint8_t recvLen
 ACK_REPORT GPIO_I2C_ReadSlavReg(uint8_t SlaveAddr, uint8_t * sendQueue, uint8_t sendLength, uint8_t * recvQueue, uint8_t recvLength );
 void GPIO_IIC_Start(void);
 void GPIO_IIC_Stop(void);
-void GPIO_IIC_Send_Byte( uint8_t txDataByte );
+void GPIO_IIC_Send_Byte( uint16_t txDataByte );
 uint8_t  GPIO_IIC_Read_Byte( ACK_REPORT ACK_status );
 ACK_REPORT GPIO_IIC_Wait_ACK(void);
 __WEAK void CPUdelay_10us( uint16_t delay_Countdown );

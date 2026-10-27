@@ -20,7 +20,7 @@
 uint8_t g_GPIOI2C_recvBuf[stack_length_GPIOI2C_Recv_buf]; /*IIC Recv buff*/
 uint8_t g_GPIOI2C_recvBufLength=0;
 uint8_t g_GPIOI2C_sendBuf[stack_length_GPIOI2C_Send_buf];/*IIC Send buff*/
-uint8_t g_GPIOI2C_send_bufLength=0;
+uint8_t g_GPIOI2C_sendBufLength=0;
 
 /*debug test variable*/
 #ifdef  GPIO_IIC_DEBUG_MODE
@@ -45,28 +45,28 @@ volatile uint16_t    countNACK_repeat=0,
 */
 ACK_REPORT GPIO_I2C_Puts(uint8_t SlaveAddr, uint8_t * sendQueue, uint8_t sendLength )
 {
-	uint8_t cursor;
+    uint8_t cursor;
     ACK_REPORT ACKstatus;
     
-	/*prepare slave address and writing symbol */
-	uint8_t DeviceSelect = ( SlaveAddr<<1 )&0xFE; 
-	
-	GPIO_IIC_Start();
+    /*prepare slave address and writing symbol */
+    uint8_t DeviceSelect = ( SlaveAddr<<1 )&0xFE; 
+    
+    GPIO_IIC_Start();
     /*Send slave address and writing symbol */
-	GPIO_IIC_Send_Byte(DeviceSelect);
+    GPIO_IIC_Send_Byte(DeviceSelect);
     ACKstatus=GPIO_IIC_Wait_ACK();  /*Waitting ACK*/
     
-	if( ACKstatus==ACK_repeat ){/*if ACK, start transmit*/
-		for(cursor=0; cursor<sendLength; cursor++){
-			GPIO_IIC_Send_Byte( sendQueue[cursor] );
-			ACKstatus=GPIO_IIC_Wait_ACK();   /*ACK check*/
+    if( ACKstatus==ACK_repeat ){/*if ACK, start transmit*/
+        for(cursor=0; cursor<sendLength; cursor++){
+            GPIO_IIC_Send_Byte( sendQueue[cursor] );
+            ACKstatus=GPIO_IIC_Wait_ACK();   /*ACK check*/
             if( ACKstatus!=ACK_repeat ){
                 break;      /*if NACK, abroad transmit*/
             }
-		}
-	}
-	GPIO_IIC_Stop();
-	return ACKstatus;
+        }
+    }
+    GPIO_IIC_Stop();
+    return ACKstatus;
 }
 
 /*
@@ -82,29 +82,29 @@ ACK_REPORT GPIO_I2C_Puts(uint8_t SlaveAddr, uint8_t * sendQueue, uint8_t sendLen
 */
 ACK_REPORT GPIO_I2C_Gets(uint8_t SlaveAddr, uint8_t * recvQueue, uint8_t recvLength )
 {
-	uint8_t cursor;
+    uint8_t cursor;
     ACK_REPORT ACKstatus;
     
-	/*prepare slave address and reading symbol */
-	uint8_t DeviceSelect = ( SlaveAddr<<1 )|0x01;
+    /*prepare slave address and reading symbol */
+    uint8_t DeviceSelect = ( SlaveAddr<<1 )|0x01;
 
-	GPIO_IIC_Start();
+    GPIO_IIC_Start();
     /*Send slave address and  reading symbol */
-	GPIO_IIC_Send_Byte( DeviceSelect );
+    GPIO_IIC_Send_Byte( DeviceSelect );
     ACKstatus=GPIO_IIC_Wait_ACK();  /*Waiting ACK*/
     
-	if( ACKstatus==ACK_repeat ){ /*if ACK, start receive*/
-		for(cursor=0; cursor<recvLength; cursor++){
-			if( recvLength==cursor+1 ){
+    if( ACKstatus==ACK_repeat ){ /*if ACK, start receive*/
+        for(cursor=0; cursor<recvLength; cursor++){
+            if( recvLength==cursor+1 ){
             /*Last recv byte NACK, ready to stop*/
             recvQueue[cursor]=GPIO_IIC_Read_Byte(NACK_repeat);
             }else{
             recvQueue[cursor]=GPIO_IIC_Read_Byte(ACK_repeat);
             }
-		}
-	}
-	GPIO_IIC_Stop();
-	return  ACKstatus;
+        }
+    }
+    GPIO_IIC_Stop();
+    return  ACKstatus;
 }
 
 /*
@@ -201,17 +201,16 @@ void GPIO_I2C_RESET( void ){
 void GPIO_IIC_Start( void )
 {
     /*step of restart:*/
-    CPUdelay_10us(1);
-	GPIO_IIC_SDA_PIN_Set_to_High;
-    CPUdelay_10us(1);
-	GPIO_IIC_SCL_PIN_Set_to_High;
+    //CPUdelay_10us(1);
+    GPIO_IIC_SDA_PIN_Set_to_High;
+    //CPUdelay_10us(1);
+    GPIO_IIC_SCL_PIN_Set_to_High;
     /*step of start:*/
-	CPUdelay_10us(1);
+    CPUdelay_10us(1);
     GPIO_IIC_SDA_PIN_Set_to_Low;
     CPUdelay_10us(1);
     GPIO_IIC_SCL_PIN_Set_to_Low;
-    
-	
+    CPUdelay_10us(1);
 }
 
 /*
@@ -225,15 +224,15 @@ void GPIO_IIC_Start( void )
 void GPIO_IIC_Stop(void)
 {
     /*STOP:when SCL to high, SDA set to high*/
-    GPIO_IIC_SDA_OUTPUT_MODE;
+    //GPIO_IIC_SDA_OUTPUT_MODE;
     GPIO_IIC_SCL_PIN_Set_to_Low;
     GPIO_IIC_SDA_PIN_Set_to_Low;  
     /*Preliminary work to ensure shutdown finished*/
-	CPUdelay_10us(1);
+    CPUdelay_10us(1);
     GPIO_IIC_SCL_PIN_Set_to_High;
     CPUdelay_10us(1);
-	GPIO_IIC_SDA_PIN_Set_to_High;
-	CPUdelay_10us(1);							   	
+    GPIO_IIC_SDA_PIN_Set_to_High;
+    CPUdelay_10us(1);
 }
 
 /*
@@ -244,23 +243,22 @@ void GPIO_IIC_Stop(void)
 *Error:
 *Author: RosaCentifolia
 */
-void GPIO_IIC_Send_Byte(uint8_t txDataByte )
+void GPIO_IIC_Send_Byte( uint16_t txDataByte )
 {                        
     uint8_t cursor,sendBit;
 
     for(cursor=0;cursor<8;cursor++){
         sendBit = txDataByte&0x80;
-		CPUdelay_10us(1);
         if( sendBit==0x80 ){
             GPIO_IIC_SDA_PIN_Set_to_High;
         }else{
             GPIO_IIC_SDA_PIN_Set_to_Low;
         }
-		txDataByte<<=1;
-		CPUdelay_10us(1);
-		GPIO_IIC_SCL_PIN_Set_to_High;
-		CPUdelay_10us(1); 
-		GPIO_IIC_SCL_PIN_Set_to_Low;
+        txDataByte<<=1;
+        CPUdelay_10us(1);
+        GPIO_IIC_SCL_PIN_Set_to_High;
+        CPUdelay_10us(1); 
+        GPIO_IIC_SCL_PIN_Set_to_Low;
     }
 }
 
@@ -275,13 +273,13 @@ void GPIO_IIC_Send_Byte(uint8_t txDataByte )
 */
 uint8_t  GPIO_IIC_Read_Byte( ACK_REPORT ACK_status )
 {
-	uint8_t cursor, recvByte=0;
+    uint8_t cursor, recvByte=0;
     
-	GPIO_IIC_SDA_INPUT_MODE;    /*switch SDA to input mode*/
+    GPIO_IIC_SDA_INPUT_MODE;    /*switch SDA to input mode*/
 
     for( cursor=0; cursor<8; cursor++ ){
-        CPUdelay_10us(1);
-		GPIO_IIC_SCL_PIN_Set_to_High;
+
+        GPIO_IIC_SCL_PIN_Set_to_High;
         CPUdelay_10us(1);
         recvByte<<=1;
         if( GPIO_IIC_SDA_PIN_Input_High ){
@@ -290,10 +288,11 @@ uint8_t  GPIO_IIC_Read_Byte( ACK_REPORT ACK_status )
             recvByte&=0xFE;
         }
         GPIO_IIC_SCL_PIN_Set_to_Low;
+        CPUdelay_10us(1);
     }
 
     GPIO_IIC_SDA_OUTPUT_MODE;   /*switch SDA to output mode*/
-    CPUdelay_10us(1);
+
     /*making ACK or NACK*/
     if ( ACK_status==ACK_repeat ){
         GPIO_IIC_SDA_PIN_Set_to_Low;
@@ -306,10 +305,10 @@ uint8_t  GPIO_IIC_Read_Byte( ACK_REPORT ACK_status )
         countNACKsend+=1;
         #endif
     }
-    CPUdelay_10us(1);
+
     GPIO_IIC_SCL_PIN_Set_to_High;
-	CPUdelay_10us(1);
-	GPIO_IIC_SCL_PIN_Set_to_Low;
+    CPUdelay_10us(1);
+    GPIO_IIC_SCL_PIN_Set_to_Low;
     
     return recvByte;
 }
@@ -326,15 +325,15 @@ uint8_t  GPIO_IIC_Read_Byte( ACK_REPORT ACK_status )
 
 ACK_REPORT GPIO_IIC_Wait_ACK(void)
 {
-	uint16_t countErrTime=0;
+    uint16_t countErrTime=0;
     #ifdef  GPIO_IIC_DEBUG_MODE
     countWaitACK+=1;
     #endif
 
-	GPIO_IIC_SDA_INPUT_MODE;       /*switch SDA to input mode*/
-	CPUdelay_10us(1);
-	GPIO_IIC_SCL_PIN_Set_to_High;
-	CPUdelay_10us(1);	 
+    GPIO_IIC_SDA_INPUT_MODE;       /*switch SDA to input mode*/
+    
+    GPIO_IIC_SCL_PIN_Set_to_High;
+    CPUdelay_10us(1);     
     
     for(countErrTime=0; countErrTime<MAXMUIN_ACK_Error; countErrTime++){  /*wating ACK*/
         if( GPIO_IIC_SDA_PIN_Input_Low ){   /*if recv ACK*/
@@ -349,7 +348,7 @@ ACK_REPORT GPIO_IIC_Wait_ACK(void)
     /*if recvn't ACK*/
     GPIO_IIC_SCL_PIN_Set_to_Low;
     GPIO_IIC_SDA_OUTPUT_MODE;   /*switch SDA to output mode*/
-    GPIO_IIC_Stop();
+    //GPIO_IIC_Stop();
     #ifdef  GPIO_IIC_DEBUG_MODE
     countNACK_repeat+=1;
     #endif
@@ -373,7 +372,7 @@ __WEAK void CPUdelay_10us( uint16_t delay_Countdown ){
     
     Count_10us *= delay_Countdown;
     
-    for(;Count_10us;Count_10us--)  ;
+    for(;Count_10us;Count_10us--);
 }
 
 
